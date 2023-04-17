@@ -1,59 +1,69 @@
 #include "mytcpserver.h"
-#include "Func_server.h"
+#include "functions.h"
 #include <QDebug>
 #include <QCoreApplication>
 
 MyTcpServer::~MyTcpServer()
-{}
-MyTcpServer::MyTcpServer(){
-    if(this->listen(QHostAddress::Any,33333))//Задаём адреса и порт подключения к серверу
+{
+    TCPServer->close();
+    server_status = 0;
+}
+
+MyTcpServer::MyTcpServer()
+{
+    TCPServer = new QTcpServer(this);
+    connect(TCPServer, &QTcpServer::newConnection,
+            this, &MyTcpServer::NewConnection);
+
+    if(!TCPServer->listen(QHostAddress::Any, 33333))
     {
-        qDebug() << "start";
+        qDebug() << "Error. Server is not started";
+    } else {
+        server_status = 1;
+        qDebug() << "Server is started";
     }
-    else    {
-        qDebug() << "error";
+}
+
+void MyTcpServer::NewConnection()
+{
+    if(server_status == 1)
+    {
+        qDebug() << "New client connected";
+        QTcpSocket *Current_TCPSocket;
+        Current_TCPSocket = TCPServer->nextPendingConnection();
+        Current_TCPSocket->write("Hello, World!!! I am EduTest Server!\r\n");
+        long long connection_id = Current_TCPSocket->socketDescriptor();
+        Current_TCPSocket->write("Your connection ID: ");
+        Current_TCPSocket->write(QString::number(connection_id).toUtf8());
+        Current_TCPSocket->write("\r\n");
+        Clients.insert(Current_TCPSocket,connection_id);
+        connect(Current_TCPSocket, &QTcpSocket::readyRead,
+                this,&MyTcpServer::ServerDataRead);
+        connect(Current_TCPSocket,&QTcpSocket::disconnected,
+                this,&MyTcpServer::ClientDisconnected);
     }
 }
 
-void MyTcpServer::incomingConnection(qintptr socketDescriptor){
-    socket=new QTcpSocket;
-    socket->setSocketDescriptor(socketDescriptor);
-    connect(socket, &QTcpSocket::readyRead,this, &MyTcpServer::slotReadyRead);
-    connect(socket,&QTcpSocket::disconnected,socket,&QTcpSocket::deleteLater);
-
-    sockets.push_back(socket);
-    qDebug()<<"Client connected" <<socketDescriptor;
+void MyTcpServer::ServerDataRead()
+{
+    QTcpSocket *Current_TCPSocket = (QTcpSocket*)sender();
+    QByteArray data_output;
+    QString data_input;
+    while(Current_TCPSocket->bytesAvailable()>0)
+    {
+        data_input += Current_TCPSocket->readAll();
+    }
+    QString connection_id = QString::number(Current_TCPSocket->socketDescriptor());
+    data_output = parsing(data_input, connection_id).toUtf8();
+    Current_TCPSocket->write(data_output);
 }
 
-void MyTcpServer::slotReadyRead(){
-    socket=(QTcpSocket*)sender();
-    QDataStream in(socket);
-
-    if(in.status()==QDataStream::Ok){
-        qDebug() <<"Ready to read.";
-        QByteArray requestData="";
-        QString request = "";
-        while(socket->bytesAvailable()>0){
-        requestData = socket->readAll();;
-        request += QString::fromUtf8(requestData);
-        qDebug() <<"client said "<<request;
-        }
-        Parsing(requestData);
-    }
-    else{
-        qDebug() << "DataStream error";
-    }
-}
-void MyTcpServer::SendToClient(QString request){
-    qDebug() <<"Sending... "<<request;
-    data.clear();
-
-    if (request=="who\r\n") {
-        socket->write("cares\n");
-    }
-    
-    else {
-    QByteArray responseData= request.toUtf8();
-    socket->write("You said: " +responseData);}
-    socket->flush();
+void MyTcpServer::ClientDisconnected()
+{
+    QTcpSocket *Current_TCPSocket = (QTcpSocket*)sender();
+    qDebug() << "Client disconnected";
+    QString connection_id = QString::number(Clients.value(Current_TCPSocket));
+    close_session(connection_id);
+    Clients.remove(Current_TCPSocket);
+    Current_TCPSocket->close();
 }
