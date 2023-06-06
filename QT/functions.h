@@ -2,6 +2,22 @@
 #define FUNCTIONS_H
 #include "db.h"
 
+QByteArray parse(QString str);
+
+QByteArray rege(const QString& email, const QString& role, const QString& password,const QString& verifypass);
+
+QByteArray auth(const QString& email,const QString& password);
+
+QString stat(const QString& email);
+
+QByteArray task1(const QString& email);
+
+QByteArray task2(const QString& email);
+
+QByteArray task3(const QString& email);
+
+QByteArray task4(const QString& email);
+
 QString authentication(QString login, QString pass, QString connection_id)
 {
     QList<QString> query_list = {"SELECT * FROM Users WHERE login = :login and password = :password;",
@@ -223,7 +239,7 @@ QString parsing(QString data, QString connection_id)
 
     if(parametrs[0] == "a")
     {
-        return "\r\n auth \r\n";
+        return "\n auth \r\n";
     }
     else if(parametrs[0] == "r")
     {
