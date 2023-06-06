@@ -6,9 +6,11 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES +=  tst_task3_unit_test.cpp \
-    ../func_for_server.cpp \
-    ../mytcpserver.cpp
+SOURCES +=
+SOURCES += 
+    ./../../../functions.cpp \
+    ./../../../mytcpserver.cpp
+    ./task3.cpp \
 
 HEADERS += \
     ./../../../db.h \
@@ -16,8 +18,8 @@ HEADERS += \
     ./../../../mytcpserver.h
 
 QT+= core
-QT += sql #для работы с БД
-QT += network #Для работы с сетью
+QT += sql 
+QT += network 
 
 
 CONFIG += c++17 console
