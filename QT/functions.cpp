@@ -2,6 +2,9 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QSqlDatabase>
+#include <QVector>
+#include <queue>
+
 QByteArray parse(QString str){
     QStringList params = str.split("|");   
     qDebug()<<params[0];
@@ -105,18 +108,129 @@ QString stat(const QString& email){
         return "stat-";
 }
 
-QByteArray task1(const QString& email){
-     return "task1";
-};
-
-QByteArray task2(const QString& email){
-     return "task2";
-};
-
-QByteArray task3(const QString& email){
-     return "task3";
-};
-
-QByteArray task4(const QString& email){
-     return "task4";
-};
+QString task1(QStringList params, int descriptor){
+    QString answer_stud = params[0]; 
+    QString right_answer = ""; 
+    QList <QString> Edges; 
+    Edges.clear();
+    Edges.push_back(params[1]);Edges.push_back(params[2]);Edges.push_back(params[1]);Edges.push_back(params[7]);Edges.push_back(params[1]);Edges.push_back(params[8]);
+    Edges.push_back(params[2]);Edges.push_back(params[6]);Edges.push_back(params[3]);Edges.push_back(params[5]);Edges.push_back(params[4]);
+    Edges.push_back(params[5]);Edges.push_back(params[5]);Edges.push_back(params[6]);Edges.push_back(params[5]);Edges.push_back(params[9]);
+    QMap <QString,int> spisok; 
+    spisok.clear();
+    for (int i=1;i<10;i++){
+        spisok[QString::number(i)]=0;
+    }
+    for (int i=0;i<Edges.size();i++){
+        spisok[Edges[i]]++;
+    }
+    QString temp;
+    for (int j=0;j<((Edges.size()/2)-1);j++){ 
+        for (int k=1;k<10;k++){
+            if (spisok[QString::number(k)]==1){
+                temp = QString::number(k); 
+                break;
+            }
+        }
+        for (int i=0;i<8;i++){
+            if (Edges[i*2]==temp){
+                spisok[Edges[i*2]]--; spisok[Edges[i*2+1]]--; 
+                right_answer += Edges[i*2+1];
+                Edges[i*2] = "-1"; Edges[i*2+1] = "-1"; 
+                break;
+            }
+            if (Edges[i*2+1]==temp){
+                spisok[Edges[i*2]]--; spisok[Edges[i*2+1]]--;
+                right_answer += Edges[i*2];
+                Edges[i*2] = "-1"; Edges[i*2+1] = "-1"; 
+                break;
+            }
+        }
+    }
+    QString right;
+    if (answer_stud==right_answer){
+        right = '+';
+    }
+    else{
+        right = '-';
+    }
+    QString ans = DataBase::getInstance()->sendQuerry("SELECT task1 FROM users WHERE Socket_id = " + QString::number(descriptor),"task1",right,descriptor);
+    if ( right =="+"){
+        return "Correct answer";
+    }
+    else{
+        return "Wrong answer, right answer: " + right_answer;
+    }
+}
+QString task2(QStringList params, int descriptor){
+    int answer_stud = params[0].toInt(); 
+    int x_2 = params[1].toInt(); 
+    int y_2 = params[2].toInt(); 
+    int real_ans = 0; 
+    
+    QString right;
+    if (answer_stud==real_ans){
+        right = '+';
+    }
+    else{
+        right = '-';
+    }
+    QString ans = DataBase::getInstance()->sendQuerry("SELECT task2 FROM users WHERE Socket_id = " + QString::number(descriptor),"task2",right,descriptor);
+    if ( right =="+"){
+        return "Correct answer";
+    }
+    else{
+        return "Wrong answer";
+    }
+}
+QString task3(QStringList params, int descriptor){
+    int answer_stud = params[0].toInt(); 
+    Graph g(6);
+    g.addEdge(0, 1, params[1].toInt());
+    g.addEdge(0, 2, params[2].toInt());
+    g.addEdge(1, 2, params[3].toInt());
+    g.addEdge(1, 3, params[4].toInt());
+    g.addEdge(2, 1, params[5].toInt());
+    g.addEdge(2, 4, params[6].toInt());
+    g.addEdge(3, 2, params[7].toInt());
+    g.addEdge(3, 5, params[8].toInt());
+    g.addEdge(4, 3, params[9].toInt());
+    g.addEdge(4, 5, params[10].toInt());
+    int maxFlow = g.maxFlow(0, 5);
+    QString right;
+    if (answer_stud== maxFlow){
+        right = '+';
+    }
+    else{
+        right = '-';
+    }
+    QString ans = DataBase::getInstance()->sendQuerry("SELECT task3 FROM users WHERE Socket_id = " + QString::number(descriptor),"task3",right,descriptor);
+    if ( right =="+"){
+        return "Correct answer";
+    }
+    else{
+        return "Wrong answer, right answer: " + QString::number(maxFlow);
+    }
+    return ans;
+}
+QString task4(QStringList params, int descriptor){
+    int answer_stud = params[0].toInt(); 
+    int x_4 = params[1].toInt(); 
+    int y_4 = params[2].toInt(); 
+    int real_ans = 0; 
+    
+    QString right;
+    if (answer_stud==real_ans){
+        right = '+';
+    }
+    else{
+        right = '-';
+    }
+    QString ans = DataBase::getInstance()->sendQuerry("SELECT task4 FROM users WHERE Socket_id = " + QString::number(descriptor),"task4",right,descriptor);
+    if ( right =="+"){
+        return "Correct answer";
+    }
+    else{
+        return "Wrong answer";
+    }
+}
