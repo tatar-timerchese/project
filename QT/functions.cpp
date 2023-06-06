@@ -1,11 +1,11 @@
-#include "funcforserv.h"
+#include "functions.h"
 #include <QDebug>
 #include <QCoreApplication>
 #include <QSqlDatabase>
 QByteArray parse(QString str){
-    QStringList params = str.split("|");   //формат msg: function|params0|params1...
+    QStringList params = str.split("|");   
     qDebug()<<params[0];
-    QString mail=params[1];           //разделяем данные для функций
+    QString mail=params[1];          
     QString pass= params[2];
     QString verpass=params[3];
     QString role = params[4];
@@ -67,12 +67,12 @@ QByteArray parse(QString str){
 }
 
 QByteArray rege(const QString& email, const QString& role, const QString& password,const QString& verifypass){
-    if(password!=verifypass)                           // надо ли?
+    if(password!=verifypass)                         
     {
-        return "passwords are not same";
+        return "Passwords are not same";
     }
     QString query = QString("INSERT INTO users (mail, pass, role) VALUES(\"%1\", \"%2\", \"%3\")").arg(email, password ,role);
-    //Database::getInstance()->execQuery(query).size()>0
+    
     Database::getInstance()->execQuery(query);  
     QString s = Database::getInstance()->execQuery("SELECT * from users where mail = \"" + email+"\"");
     if (s.size()>0) {
@@ -85,11 +85,11 @@ QByteArray rege(const QString& email, const QString& role, const QString& passwo
 QByteArray auth(const QString& email,const QString& password){
     QString query = QString("SELECT * FROM users WHERE mail = \"" + email+"\"");
     qDebug()<<query;
-    if (Database::getInstance()->execQuery(query).size()>0){  // Если найдено больше нуля записей с заданным именем пользователя,
+    if (Database::getInstance()->execQuery(query).size()>0){  
         return "auth+";
         Database::getInstance()->execQuery("UPDATE users SET in_sys = 1 WHERE mail = \"" + email+"\"");
     }
-    else                                                                     // Иначе пользователь с заданным именем не найден в базе данных.
+    else                                                                  
         return "auth- ";
 }
 
