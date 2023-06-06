@@ -6,8 +6,7 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES +=
-SOURCES += 
+SOURCES +=  \
     ./../../../functions.cpp \
     ./../../../mytcpserver.cpp
     ./task3.cpp \
